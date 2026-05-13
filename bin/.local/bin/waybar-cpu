@@ -107,6 +107,7 @@ usage = cpu_usage()
 load = os.getloadavg()
 frequency = cpu_frequency()
 temperatures = sensors_temperatures() or hwmon_temperatures()
+max_temperature = max((value for _, value in temperatures), default=None)
 
 tooltip = [
     f"Usage: {usage}%",
@@ -119,15 +120,20 @@ if frequency:
     tooltip.append(f"Max freq: {max_freq:.2f} GHz")
 
 if temperatures:
+    tooltip.append(f"Max temp: {max_temperature:.1f}\u00b0C")
     tooltip.append("Thermals:")
     tooltip.extend(f"{label}: {value:.1f}\u00b0C" for label, value in temperatures[:8])
 else:
     tooltip.append("Thermals: unavailable")
 
-if usage >= 90:
+if max_temperature is None:
+    css_class = "normal"
+elif max_temperature >= 90:
     css_class = "critical"
-elif usage >= 70:
-    css_class = "warning"
+elif max_temperature >= 80:
+    css_class = "hot"
+elif max_temperature >= 70:
+    css_class = "warm"
 else:
     css_class = "normal"
 

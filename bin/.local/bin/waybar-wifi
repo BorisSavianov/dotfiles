@@ -1,0 +1,217 @@
+#!/usr/bin/env python3
+import json
+import re
+import shutil
+import subprocess
+
+
+def run(command):
+    try:
+        result = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=1,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip()
+
+
+def split_nmcli(line):
+    fields = []
+    field = []
+    escaped = False
+
+    for char in line:
+        if escaped:
+            field.append(char)
+            escaped = False
+        elif char == "\\":
+            escaped = True
+        elif char == ":":
+            fields.append("".join(field))
+            field = []
+        else:
+            field.append(char)
+
+    fields.append("".join(field))
+    return fields
+
+
+def ip_address(device):
+    output = run(["ip", "-o", "-4", "addr", "show", "dev", device])
+    if not output:
+        return None
+
+    match = re.search(r"\binet\s+([0-9.]+/\d+)", output)
+    if match:
+        return match.group(1)
+    return None
+
+
+def nmcli_device(kind):
+    if not shutil.which("nmcli"):
+        return None
+
+    output = run(["nmcli", "-t", "-f", "DEVICE,TYPE,STATE,CONNECTION", "device", "status"])
+    if not output:
+        return None
+
+    for line in output.splitlines():
+        fields = split_nmcli(line)
+        if len(fields) < 4:
+            continue
+
+        device, device_type, state, connection = fields[:4]
+        if device_type == kind and state.startswith("connected"):
+            return device, connection
+
+    return None
+
+
+def nmcli_wifi_signal():
+    if not shutil.which("nmcli"):
+        return None
+
+    field_sets = (
+        ("ACTIVE", "SSID", "SIGNAL"),
+        ("IN-USE", "SSID", "SIGNAL"),
+    )
+
+    for fields in field_sets:
+        output = run(["nmcli", "-t", "-f", ",".join(fields), "device", "wifi"])
+        if not output:
+            continue
+
+        for line in output.splitlines():
+            values = split_nmcli(line)
+            if len(values) < 3:
+                continue
+
+            active, ssid, signal = values[:3]
+            if active not in ("yes", "*"):
+                continue
+
+            try:
+                return ssid or "WiFi", int(signal)
+            except ValueError:
+                return ssid or "WiFi", None
+
+    return None
+
+
+def iw_wifi():
+    if not shutil.which("iw"):
+        return None
+
+    output = run(["iw", "dev"])
+    if not output:
+        return None
+
+    interfaces = []
+    for line in output.splitlines():
+        line = line.strip()
+        if line.startswith("Interface "):
+            interfaces.append(line.split(None, 1)[1])
+
+    for device in interfaces:
+        link = run(["iw", "dev", device, "link"])
+        if not link or "Connected to" not in link:
+            continue
+
+        ssid = "WiFi"
+        signal = None
+        for line in link.splitlines():
+            line = line.strip()
+            if line.startswith("SSID:"):
+                ssid = line.split(":", 1)[1].strip() or ssid
+            elif line.startswith("signal:"):
+                match = re.search(r"(-?\d+)", line)
+                if match:
+                    dbm = int(match.group(1))
+                    signal = max(0, min(100, 2 * (dbm + 100)))
+
+        return device, ssid, signal
+
+    return None
+
+
+def wifi_icon(signal):
+    if signal is None:
+        return "󰤨"
+    if signal <= 30:
+        return "󰤟"
+    if signal <= 60:
+        return "󰤢"
+    if signal <= 80:
+        return "󰤥"
+    return "󰤨"
+
+
+def signal_classes(signal):
+    if signal is None:
+        return ["wifi", "ok"]
+    if signal <= 5:
+        return ["wifi", "critical"]
+    if signal <= 15:
+        return ["wifi", "very-low"]
+    if signal <= 30:
+        return ["wifi", "low"]
+    return ["wifi", "ok"]
+
+
+def print_status(text, tooltip, css_classes, percentage=0):
+    print(
+        json.dumps(
+            {
+                "text": text,
+                "tooltip": tooltip,
+                "class": css_classes,
+                "percentage": percentage,
+            }
+        )
+    )
+
+
+wifi_device = nmcli_device("wifi")
+wifi_signal = nmcli_wifi_signal()
+
+if wifi_device and wifi_signal:
+    device, _ = wifi_device
+    ssid, signal = wifi_signal
+    signal_text = "unknown" if signal is None else f"{signal}%"
+    address = ip_address(device) or "no IPv4"
+    text = f"{wifi_icon(signal)} {signal_text}"
+    tooltip = f"{ssid}\n{device}: {address}\nSignal: {signal_text}\nLeft: network settings\nRight: nmtui"
+    print_status(text, tooltip, signal_classes(signal), signal or 0)
+    raise SystemExit(0)
+
+iw_status = iw_wifi()
+if iw_status:
+    device, ssid, signal = iw_status
+    signal_text = "unknown" if signal is None else f"{signal}%"
+    address = ip_address(device) or "no IPv4"
+    text = f"{wifi_icon(signal)} {signal_text}"
+    tooltip = f"{ssid}\n{device}: {address}\nSignal: {signal_text}\nLeft: network settings\nRight: nmtui"
+    print_status(text, tooltip, signal_classes(signal), signal or 0)
+    raise SystemExit(0)
+
+ethernet_device = nmcli_device("ethernet")
+if ethernet_device:
+    device, connection = ethernet_device
+    address = ip_address(device) or "no IPv4"
+    tooltip = f"{connection}\n{device}: {address}\nLeft: network settings\nRight: nmtui"
+    print_status("󰈀", tooltip, ["ethernet", "ok"], 100)
+    raise SystemExit(0)
+
+print_status(
+    "󰤮",
+    "Network disconnected\nLeft: network settings\nRight: nmtui",
+    ["offline", "critical"],
+    0,
+)

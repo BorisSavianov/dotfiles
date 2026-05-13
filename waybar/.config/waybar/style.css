@@ -1,22 +1,25 @@
-@define-color base rgba(0, 0, 0, 0.92);
-@define-color panel rgba(18, 18, 18, 0.92);
-@define-color panel_hover rgba(34, 34, 34, 0.96);
-@define-color border rgba(255, 255, 255, 0.10);
-@define-color border_active rgba(102, 217, 200, 0.72);
-@define-color text #f2f2f2;
-@define-color muted #9a9a9a;
+@define-color base #050607;
+@define-color surface rgba(12, 14, 17, 0.94);
+@define-color surface_raised rgba(17, 20, 24, 0.96);
+@define-color surface_hover rgba(24, 29, 35, 0.96);
+@define-color border rgba(255, 255, 255, 0.08);
+@define-color border_hover rgba(255, 255, 255, 0.14);
+@define-color text #edf2f4;
+@define-color muted #8f989f;
+@define-color dim #5f686f;
 @define-color accent #66d9c8;
-@define-color accent_dark #071311;
-@define-color amber #e0b75b;
-@define-color green #8bd17c;
-@define-color warning #e5b85c;
+@define-color accent_dim rgba(102, 217, 200, 0.38);
+@define-color accent_soft rgba(102, 217, 200, 0.14);
+@define-color accent_dark #03100e;
+@define-color yellow #e5b85c;
+@define-color orange #ff9f43;
 @define-color danger #ff6b6b;
 
 * {
   border: none;
   border-radius: 0;
   box-shadow: none;
-  font-family: "Symbols Nerd Font", "FreeSans", "FreeMono", sans-serif;
+  font-family: "Adwaita Sans", "Symbols Nerd Font", "FreeSans", sans-serif;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0;
@@ -38,14 +41,34 @@ window#waybar > box {
 }
 
 tooltip {
-  background: rgba(8, 8, 8, 0.98);
+  background: rgba(5, 6, 7, 0.98);
   border: 1px solid @border;
-  border-radius: 6px;
+  border-radius: 7px;
 }
 
 tooltip label {
   color: @text;
   padding: 8px;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+  background: @surface;
+  border: 1px solid @border;
+  border-radius: 8px;
+  margin: 2px;
+  padding: 3px;
+}
+
+.modules-center {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.modules-right {
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 #mode,
@@ -54,103 +77,103 @@ tooltip label {
 #idle_inhibitor,
 #pulseaudio,
 #backlight,
-#network,
+#custom-wifi,
 #bluetooth,
 #custom-cpu,
 #memory,
 #battery,
 #tray {
-  background: @panel;
-  border: 1px solid @border;
-  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
   color: @text;
-  margin: 2px;
+  margin: 0;
   min-height: 24px;
-  padding: 0 8px;
+  padding: 0 7px;
 }
 
+#clock:hover,
 #mpris:hover,
 #idle_inhibitor:hover,
 #pulseaudio:hover,
 #backlight:hover,
-#network:hover,
+#custom-wifi:hover,
 #bluetooth:hover,
 #custom-cpu:hover,
 #memory:hover,
 #battery:hover {
-  background: @panel_hover;
-  border-color: rgba(255, 255, 255, 0.18);
+  background: @surface_hover;
+  border-color: @border_hover;
 }
 
 #workspaces {
-  background: @panel;
-  border: 1px solid @border;
-  border-radius: 8px;
-  margin: 2px;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  margin: 0;
   min-height: 24px;
-  padding: 1px;
+  padding: 0;
 }
 
 #workspaces button {
   background: transparent;
-  border-bottom: 2px solid transparent;
+  border: 1px solid transparent;
   border-radius: 6px;
   color: @muted;
   margin: 0 1px;
-  min-height: 20px;
+  min-height: 24px;
   min-width: 24px;
-  padding: 0 7px;
+  padding: 0 6px;
 }
 
 #workspaces button:hover {
-  background: @panel_hover;
+  background: @surface_hover;
+  border-color: @border_hover;
   color: @text;
+}
+
+#workspaces button.visible {
+  background: @accent_soft;
+  border-color: @accent_dim;
+  color: @accent;
 }
 
 #workspaces button.focused,
 #workspaces button.active {
   background: @accent;
-  border-bottom-color: @accent;
+  border-color: @accent;
   color: @accent_dark;
 }
 
-#workspaces button.visible {
-  border-bottom-color: @border_active;
-  color: @text;
-}
-
 #workspaces button.persistent {
-  color: #6f6f6f;
+  color: @dim;
 }
 
 #workspaces button.urgent {
   background: @danger;
-  border-bottom-color: @danger;
-  color: #000000;
+  border-color: @danger;
+  color: @base;
 }
 
 #mode {
-  background: @amber;
-  border-color: @amber;
-  color: #080808;
+  background: rgba(229, 184, 92, 0.14);
+  border-color: rgba(229, 184, 92, 0.42);
+  color: @yellow;
   font-weight: 700;
 }
 
 #clock {
-  background: @text;
-  border-color: @text;
-  color: #050505;
+  color: @text;
   font-weight: 700;
   padding: 0 11px;
 }
 
 #mpris {
-  color: @amber;
+  color: @muted;
   min-width: 0;
 }
 
 #mpris.playing {
-  border-color: rgba(102, 217, 200, 0.35);
   color: @accent;
 }
 
@@ -159,40 +182,51 @@ tooltip label {
 }
 
 #idle_inhibitor.activated {
-  background: rgba(102, 217, 200, 0.18);
-  border-color: @border_active;
+  background: @accent_soft;
+  border-color: @accent_dim;
   color: @accent;
 }
 
 #pulseaudio.muted,
-#network.disconnected,
-#network.disabled,
+#custom-wifi.offline,
 #bluetooth.off {
   background: rgba(255, 107, 107, 0.12);
   border-color: rgba(255, 107, 107, 0.30);
   color: @danger;
 }
 
-#network.wifi,
-#network.ethernet,
+#custom-wifi.ok,
+#custom-wifi.ethernet,
 #bluetooth.connected {
   color: @accent;
 }
 
 #backlight {
-  color: @amber;
+  color: @text;
 }
 
-#custom-cpu.warning,
-#memory.warning,
-#battery.warning:not(.charging) {
+#battery.low:not(.charging):not(.plugged),
+#custom-wifi.low,
+#custom-cpu.warm,
+#memory.high {
+  background: rgba(229, 184, 92, 0.10);
   border-color: rgba(229, 184, 92, 0.40);
-  color: @warning;
+  color: @yellow;
+}
+
+#battery.very-low:not(.charging):not(.plugged),
+#custom-wifi.very-low,
+#custom-cpu.hot,
+#memory.very-high {
+  background: rgba(255, 159, 67, 0.12);
+  border-color: rgba(255, 159, 67, 0.44);
+  color: @orange;
 }
 
 #custom-cpu.critical,
+#custom-wifi.critical,
 #memory.critical,
-#battery.critical:not(.charging) {
+#battery.critical:not(.charging):not(.plugged) {
   background: rgba(255, 107, 107, 0.14);
   border-color: rgba(255, 107, 107, 0.42);
   color: @danger;
@@ -200,10 +234,10 @@ tooltip label {
 
 #battery.charging,
 #battery.plugged {
-  border-color: rgba(139, 209, 124, 0.36);
-  color: @green;
+  border-color: @accent_dim;
+  color: @accent;
 }
 
 #tray {
-  padding: 0 7px;
+  padding: 0 6px;
 }

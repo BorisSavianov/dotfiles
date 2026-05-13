@@ -5,7 +5,7 @@
   "margin-top": 8,
   "margin-left": 10,
   "margin-right": 10,
-  "spacing": 5,
+  "spacing": 2,
   "fixed-center": true,
   "reload_style_on_change": true,
 
@@ -21,7 +21,7 @@
     "idle_inhibitor",
     "pulseaudio",
     "backlight",
-    "network",
+    "custom/wifi",
     "bluetooth",
     "custom/cpu",
     "memory",
@@ -64,9 +64,9 @@
       "artist"
     ],
     "dynamic-separator": " - ",
-    "dynamic-len": 34,
-    "artist-len": 18,
-    "title-len": 24,
+    "dynamic-len": 28,
+    "artist-len": 16,
+    "title-len": 22,
     "status-icons": {
       "playing": "",
       "paused": "",
@@ -123,26 +123,15 @@
     "tooltip-format": "Brightness {percent}%"
   },
 
-  "network": {
+  "custom/wifi": {
     "interval": 3,
-    "format-wifi": "{icon} {signalStrength}%",
-    "format-ethernet": "󰈀",
-    "format-linked": "󰈁",
-    "format-disconnected": "󰤮",
-    "format-disabled": "󰤮",
-    "format-icons": [
-      "󰤟",
-      "󰤢",
-      "󰤥",
-      "󰤨"
-    ],
+    "exec": "/home/boris/.local/bin/waybar-wifi",
+    "return-type": "json",
+    "format": "{text}",
+    "max-length": 10,
     "on-click": "nm-connection-editor",
     "on-click-right": "kitty -e nmtui",
-    "tooltip-format": "{ifname}: {ipaddr}/{cidr}",
-    "tooltip-format-wifi": "{essid}\n{ifname}: {ipaddr}/{cidr}\nSignal: {signalStrength}% ({signaldBm} dBm)\nUp: {bandwidthUpBytes} B/s  Down: {bandwidthDownBytes} B/s",
-    "tooltip-format-ethernet": "{ifname}: {ipaddr}/{cidr}\nGateway: {gwaddr}\nUp: {bandwidthUpBytes} B/s  Down: {bandwidthDownBytes} B/s",
-    "tooltip-format-disconnected": "Network disconnected\nLeft: network settings\nRight: nmtui",
-    "tooltip-format-disabled": "Network disabled"
+    "tooltip": true
   },
 
   "bluetooth": {
@@ -167,29 +156,18 @@
     "interval": 2,
     "exec": "/home/boris/.local/bin/waybar-cpu",
     "return-type": "json",
-    "format": " {icon} {text}",
-    "format-icons": [
-      "󰡵",
-      "󰾆",
-      "󰾅",
-      "󰡴"
-    ],
+    "format": " {text}",
     "on-click": "kitty -e htop",
     "tooltip": true
   },
 
   "memory": {
     "interval": 5,
-    "format": " {icon} {percentage}%",
-    "format-icons": [
-      "󰡵",
-      "󰾆",
-      "󰾅",
-      "󰡴"
-    ],
+    "format": " {percentage}%",
     "states": {
-      "warning": 75,
-      "critical": 90
+      "high": 70,
+      "very-high": 85,
+      "critical": 95
     },
     "on-click": "kitty -e htop",
     "tooltip-format": "{used:0.1f} GiB used / {total:0.1f} GiB\nSwap: {swapPercentage}%"
@@ -200,8 +178,9 @@
     "adapter": "AC",
     "interval": 30,
     "states": {
-      "warning": 30,
-      "critical": 15
+      "low": 30,
+      "very-low": 15,
+      "critical": 5
     },
     "format": "{icon} {capacity}%",
     "format-charging": "󰂄 {capacity}%",
