@@ -64,7 +64,8 @@ tooltip label {
   border: 1px solid @border;
   border-radius: 8px;
   color: @text;
-  margin: 0 2px;
+  margin: 2px;
+  min-height: 24px;
   padding: 0 8px;
 }
 
@@ -85,7 +86,8 @@ tooltip label {
   background: @panel;
   border: 1px solid @border;
   border-radius: 8px;
-  margin: 0 2px;
+  margin: 2px;
+  min-height: 24px;
   padding: 1px;
 }
 
@@ -95,6 +97,7 @@ tooltip label {
   border-radius: 6px;
   color: @muted;
   margin: 0 1px;
+  min-height: 20px;
   min-width: 24px;
   padding: 0 7px;
 }
