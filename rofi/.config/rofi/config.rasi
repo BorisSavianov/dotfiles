@@ -1,0 +1,15 @@
+configuration {
+  modes: "drun,run,window";
+  show-icons: true;
+  icon-theme: "hicolor";
+  terminal: "kitty";
+  matching: "fuzzy";
+  sort: true;
+  drun-match-fields: "name,generic,exec,categories,keywords";
+  drun-display-format: "{name}";
+  display-drun: "apps";
+  display-run: "run";
+  display-window: "win";
+}
+
+@theme "black"

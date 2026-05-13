@@ -1,0 +1,33 @@
+_backup/
+
+.DS_Store
+*.swp
+*.swo
+*~
+*.tmp
+*.bak
+*.orig
+*.rej
+
+*.log
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.cache
+
+**/.credentials.json
+**/auth.json
+**/history.jsonl
+**/known_hosts*
+**/id_*
+**/private-keys-v1.d/
+
+**/Cache/
+**/cache/
+**/Code Cache/
+**/GPUCache/
+**/ShaderCache/
+**/Session Storage/
+**/Local Storage/
+**/Cookies*

@@ -1,0 +1,82 @@
+#!/bin/sh
+set -eu
+
+mode="${1:-area}"
+script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+
+find_cmd() {
+    name="$1"
+
+    if command -v "$name" >/dev/null 2>&1; then
+        command -v "$name"
+    elif [ -x "/usr/sbin/$name" ]; then
+        printf '%s\n' "/usr/sbin/$name"
+    elif [ -x "/usr/bin/$name" ]; then
+        printf '%s\n' "/usr/bin/$name"
+    elif [ -x "/bin/$name" ]; then
+        printf '%s\n' "/bin/$name"
+    else
+        return 1
+    fi
+}
+
+find_wl_copy() {
+    if command -v wl-copy >/dev/null 2>&1; then
+        command -v wl-copy
+    elif [ -x "$script_dir/wl-copy" ]; then
+        printf '%s\n' "$script_dir/wl-copy"
+    elif [ -x "$HOME/.local/bin/wl-copy" ]; then
+        printf '%s\n' "$HOME/.local/bin/wl-copy"
+    else
+        return 1
+    fi
+}
+
+copy_to_clipboard() {
+    file_path="$1"
+    wl_copy="$(find_wl_copy)"
+    setsid_bin="$(find_cmd setsid 2>/dev/null || true)"
+
+    if [ -n "$setsid_bin" ]; then
+        "$setsid_bin" -f "$wl_copy" --type image/png --foreground < "$file_path" >/dev/null 2>&1
+    else
+        "$wl_copy" --type image/png < "$file_path"
+    fi
+}
+
+dir="${XDG_SCREENSHOTS_DIR:-${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots}"
+mkdir -p "$dir"
+grim_bin="$(find_cmd grim)"
+slurp_bin="$(find_cmd slurp)"
+
+base="Screenshot_$(date '+%Y-%m-%d_%H-%M-%S')"
+file="$dir/$base.png"
+index=1
+
+while [ -e "$file" ]; do
+    file="$dir/$base-$index.png"
+    index=$((index + 1))
+done
+
+case "$mode" in
+    full)
+        "$grim_bin" "$file"
+        ;;
+    area|select|selection)
+        geometry="$("$slurp_bin")" || exit 0
+        [ -n "$geometry" ] || exit 0
+        "$grim_bin" -g "$geometry" "$file"
+        ;;
+    *)
+        printf 'usage: screenshot [full|area]\n' >&2
+        exit 2
+        ;;
+esac
+
+copy_to_clipboard "$file"
+
+if command -v notify-send >/dev/null 2>&1; then
+    notify-send 'Screenshot saved' "$file" || true
+fi
+
+printf '%s\n' "$file"

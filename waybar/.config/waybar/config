@@ -1,0 +1,230 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 32,
+  "margin-top": 8,
+  "margin-left": 10,
+  "margin-right": 10,
+  "spacing": 5,
+  "fixed-center": true,
+  "reload_style_on_change": true,
+
+  "modules-left": [
+    "sway/workspaces",
+    "sway/mode"
+  ],
+  "modules-center": [
+    "clock"
+  ],
+  "modules-right": [
+    "mpris",
+    "idle_inhibitor",
+    "pulseaudio",
+    "backlight",
+    "network",
+    "bluetooth",
+    "custom/cpu",
+    "memory",
+    "battery",
+    "tray"
+  ],
+
+  "sway/workspaces": {
+    "all-outputs": false,
+    "disable-scroll": false,
+    "disable-scroll-wraparound": true,
+    "sort-by-number": true,
+    "format": "{name}",
+    "tooltip-format": "Workspace {name}"
+  },
+
+  "sway/mode": {
+    "format": " {}",
+    "tooltip": false
+  },
+
+  "clock": {
+    "interval": 30,
+    "format": " {:%a %H:%M}",
+    "format-alt": " {:%Y-%m-%d  %H:%M:%S}",
+    "tooltip-format": "<big>{:%A, %d %B %Y}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+
+  "mpris": {
+    "player": "playerctld",
+    "format": "{status_icon} {dynamic}",
+    "format-paused": "{status_icon} {dynamic}",
+    "format-stopped": "",
+    "dynamic-order": [
+      "artist",
+      "title"
+    ],
+    "dynamic-importance-order": [
+      "title",
+      "artist"
+    ],
+    "dynamic-separator": " - ",
+    "dynamic-len": 34,
+    "artist-len": 18,
+    "title-len": 24,
+    "status-icons": {
+      "playing": "",
+      "paused": "",
+      "stopped": ""
+    },
+    "on-click": "playerctl play-pause",
+    "on-click-middle": "playerctl previous",
+    "on-click-right": "playerctl next",
+    "tooltip-format": "{player} {status}\n{dynamic}"
+  },
+
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "",
+      "deactivated": ""
+    },
+    "tooltip-format-activated": "Idle inhibitor active",
+    "tooltip-format-deactivated": "Idle inhibitor inactive"
+  },
+
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-bluetooth": " {volume}%",
+    "format-muted": "󰖁",
+    "format-source": " {volume}%",
+    "format-source-muted": "",
+    "format-icons": {
+      "default": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "scroll-step": 5,
+    "max-volume": 120,
+    "on-click": "pavucontrol",
+    "on-click-middle": "pactl set-source-mute @DEFAULT_SOURCE@ toggle",
+    "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+    "tooltip-format": "{desc}\nLeft: mixer\nMiddle: mute mic\nRight: mute output"
+  },
+
+  "backlight": {
+    "format": "{icon} {percent}%",
+    "format-icons": [
+      "󰃞",
+      "󰃟",
+      "󰃠"
+    ],
+    "scroll-step": 5,
+    "on-click": "brightnessctl set 50%",
+    "on-scroll-up": "brightnessctl set 5%+",
+    "on-scroll-down": "brightnessctl set 5%-",
+    "tooltip-format": "Brightness {percent}%"
+  },
+
+  "network": {
+    "interval": 3,
+    "format-wifi": "{icon} {signalStrength}%",
+    "format-ethernet": "󰈀",
+    "format-linked": "󰈁",
+    "format-disconnected": "󰤮",
+    "format-disabled": "󰤮",
+    "format-icons": [
+      "󰤟",
+      "󰤢",
+      "󰤥",
+      "󰤨"
+    ],
+    "on-click": "nm-connection-editor",
+    "on-click-right": "kitty -e nmtui",
+    "tooltip-format": "{ifname}: {ipaddr}/{cidr}",
+    "tooltip-format-wifi": "{essid}\n{ifname}: {ipaddr}/{cidr}\nSignal: {signalStrength}% ({signaldBm} dBm)\nUp: {bandwidthUpBytes} B/s  Down: {bandwidthDownBytes} B/s",
+    "tooltip-format-ethernet": "{ifname}: {ipaddr}/{cidr}\nGateway: {gwaddr}\nUp: {bandwidthUpBytes} B/s  Down: {bandwidthDownBytes} B/s",
+    "tooltip-format-disconnected": "Network disconnected\nLeft: network settings\nRight: nmtui",
+    "tooltip-format-disabled": "Network disabled"
+  },
+
+  "bluetooth": {
+    "format": "󰂯",
+    "format-on": "󰂯",
+    "format-off": "󰂲",
+    "format-disabled": "󰂲",
+    "format-no-controller": "",
+    "format-connected": "󰂱 {num_connections}",
+    "format-connected-battery": "󰂱 {device_battery_percentage}%",
+    "on-click": "/home/boris/.local/bin/toggle-bluetooth",
+    "on-click-right": "kitty -e bluetoothctl",
+    "tooltip-format": "{controller_alias}\nLeft: toggle power\nRight: bluetoothctl",
+    "tooltip-format-disabled": "Bluetooth disabled\nLeft: turn on\nRight: bluetoothctl",
+    "tooltip-format-off": "Bluetooth off\nLeft: turn on\nRight: bluetoothctl",
+    "tooltip-format-connected": "{controller_alias}\nLeft: toggle power\nRight: bluetoothctl\n\n{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}  {device_address}",
+    "tooltip-format-enumerate-connected-battery": "{device_alias}  {device_battery_percentage}%"
+  },
+
+  "custom/cpu": {
+    "interval": 2,
+    "exec": "/home/boris/.local/bin/waybar-cpu",
+    "return-type": "json",
+    "format": " {icon} {text}",
+    "format-icons": [
+      "󰡵",
+      "󰾆",
+      "󰾅",
+      "󰡴"
+    ],
+    "on-click": "kitty -e htop",
+    "tooltip": true
+  },
+
+  "memory": {
+    "interval": 5,
+    "format": " {icon} {percentage}%",
+    "format-icons": [
+      "󰡵",
+      "󰾆",
+      "󰾅",
+      "󰡴"
+    ],
+    "states": {
+      "warning": 75,
+      "critical": 90
+    },
+    "on-click": "kitty -e htop",
+    "tooltip-format": "{used:0.1f} GiB used / {total:0.1f} GiB\nSwap: {swapPercentage}%"
+  },
+
+  "battery": {
+    "bat": "BAT0",
+    "adapter": "AC",
+    "interval": 30,
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰚥 {capacity}%",
+    "format-full": "󰁹",
+    "format-icons": [
+      "󰁺",
+      "󰁻",
+      "󰁼",
+      "󰁽",
+      "󰁾",
+      "󰁿",
+      "󰂀",
+      "󰂁",
+      "󰂂",
+      "󰁹"
+    ],
+    "format-time": "{H}h {M}m",
+    "tooltip-format": "{capacity}%\n{time}\nHealth: {health}%"
+  },
+
+  "tray": {
+    "icon-size": 15,
+    "spacing": 6
+  }
+}

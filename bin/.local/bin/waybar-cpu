@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+import glob
+import json
+import os
+import re
+import subprocess
+import time
+
+
+def read_cpu_totals():
+    with open("/proc/stat", "r", encoding="utf-8") as stat:
+        fields = stat.readline().split()[1:]
+    values = [int(value) for value in fields[:8]]
+    idle = values[3] + values[4]
+    non_idle = values[0] + values[1] + values[2] + values[5] + values[6] + values[7]
+    return idle + non_idle, idle
+
+
+def cpu_usage():
+    total_a, idle_a = read_cpu_totals()
+    time.sleep(0.15)
+    total_b, idle_b = read_cpu_totals()
+
+    total_delta = total_b - total_a
+    idle_delta = idle_b - idle_a
+    if total_delta <= 0:
+        return 0
+
+    return round(100 * (total_delta - idle_delta) / total_delta)
+
+
+def cpu_frequency():
+    values = []
+    for path in glob.glob("/sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_cur_freq"):
+        try:
+            with open(path, "r", encoding="utf-8") as freq:
+                values.append(int(freq.read().strip()) / 1_000_000)
+        except (OSError, ValueError):
+            pass
+
+    if not values:
+        try:
+            with open("/proc/cpuinfo", "r", encoding="utf-8") as info:
+                for line in info:
+                    if line.startswith("cpu MHz"):
+                        values.append(float(line.split(":", 1)[1].strip()) / 1000)
+        except OSError:
+            pass
+
+    if not values:
+        return None
+
+    return sum(values) / len(values), max(values)
+
+
+def sensors_temperatures():
+    labels = ("Package id", "Tctl", "Tccd", "Core ", "CPU")
+    degree = "\u00b0"
+    pattern = re.compile(r"^\s*([^:]+):\s+\+?([0-9.]+)\s*" + degree + "C")
+    try:
+        result = subprocess.run(
+            ["sensors"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=1,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+
+    temperatures = []
+    for line in result.stdout.splitlines():
+        match = pattern.match(line)
+        if not match:
+            continue
+        label, value = match.groups()
+        if label.startswith(labels):
+            label = label.replace("Package id 0", "Package").strip()
+            temperatures.append((label, float(value)))
+
+    return temperatures
+
+
+def hwmon_temperatures():
+    temperatures = []
+    for path in glob.glob("/sys/class/hwmon/hwmon*/temp*_input"):
+        try:
+            with open(path, "r", encoding="utf-8") as temp_file:
+                value = int(temp_file.read().strip()) / 1000
+        except (OSError, ValueError):
+            continue
+
+        label_path = path.replace("_input", "_label")
+        try:
+            with open(label_path, "r", encoding="utf-8") as label_file:
+                label = label_file.read().strip()
+        except OSError:
+            label = os.path.basename(path).replace("_input", "")
+
+        if label.startswith(("Package id", "Tctl", "Tccd", "Core ", "CPU")):
+            temperatures.append((label.replace("Package id 0", "Package"), value))
+
+    return temperatures
+
+
+usage = cpu_usage()
+load = os.getloadavg()
+frequency = cpu_frequency()
+temperatures = sensors_temperatures() or hwmon_temperatures()
+
+tooltip = [
+    f"Usage: {usage}%",
+    f"Load: {load[0]:.2f} {load[1]:.2f} {load[2]:.2f}",
+]
+
+if frequency:
+    avg_freq, max_freq = frequency
+    tooltip.append(f"Avg freq: {avg_freq:.2f} GHz")
+    tooltip.append(f"Max freq: {max_freq:.2f} GHz")
+
+if temperatures:
+    tooltip.append("Thermals:")
+    tooltip.extend(f"{label}: {value:.1f}\u00b0C" for label, value in temperatures[:8])
+else:
+    tooltip.append("Thermals: unavailable")
+
+if usage >= 90:
+    css_class = "critical"
+elif usage >= 70:
+    css_class = "warning"
+else:
+    css_class = "normal"
+
+print(
+    json.dumps(
+        {
+            "text": f"{usage}%",
+            "tooltip": "\n".join(tooltip),
+            "percentage": usage,
+            "class": css_class,
+        }
+    )
+)

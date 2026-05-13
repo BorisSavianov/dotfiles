@@ -1,0 +1,206 @@
+@define-color base rgba(0, 0, 0, 0.92);
+@define-color panel rgba(18, 18, 18, 0.92);
+@define-color panel_hover rgba(34, 34, 34, 0.96);
+@define-color border rgba(255, 255, 255, 0.10);
+@define-color border_active rgba(102, 217, 200, 0.72);
+@define-color text #f2f2f2;
+@define-color muted #9a9a9a;
+@define-color accent #66d9c8;
+@define-color accent_dark #071311;
+@define-color amber #e0b75b;
+@define-color green #8bd17c;
+@define-color warning #e5b85c;
+@define-color danger #ff6b6b;
+
+* {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  font-family: "Symbols Nerd Font", "FreeSans", "FreeMono", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  min-height: 0;
+}
+
+window#waybar {
+  background: transparent;
+  color: @text;
+}
+
+window#waybar.hidden {
+  opacity: 0.35;
+}
+
+window#waybar > box {
+  background: transparent;
+  padding: 0;
+}
+
+tooltip {
+  background: rgba(8, 8, 8, 0.98);
+  border: 1px solid @border;
+  border-radius: 6px;
+}
+
+tooltip label {
+  color: @text;
+  padding: 8px;
+}
+
+#mode,
+#clock,
+#mpris,
+#idle_inhibitor,
+#pulseaudio,
+#backlight,
+#network,
+#bluetooth,
+#custom-cpu,
+#memory,
+#battery,
+#tray {
+  background: @panel;
+  border: 1px solid @border;
+  border-radius: 8px;
+  color: @text;
+  margin: 0 2px;
+  padding: 0 8px;
+}
+
+#mpris:hover,
+#idle_inhibitor:hover,
+#pulseaudio:hover,
+#backlight:hover,
+#network:hover,
+#bluetooth:hover,
+#custom-cpu:hover,
+#memory:hover,
+#battery:hover {
+  background: @panel_hover;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+#workspaces {
+  background: @panel;
+  border: 1px solid @border;
+  border-radius: 8px;
+  margin: 0 2px;
+  padding: 1px;
+}
+
+#workspaces button {
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: 6px;
+  color: @muted;
+  margin: 0 1px;
+  min-width: 24px;
+  padding: 0 7px;
+}
+
+#workspaces button:hover {
+  background: @panel_hover;
+  color: @text;
+}
+
+#workspaces button.focused,
+#workspaces button.active {
+  background: @accent;
+  border-bottom-color: @accent;
+  color: @accent_dark;
+}
+
+#workspaces button.visible {
+  border-bottom-color: @border_active;
+  color: @text;
+}
+
+#workspaces button.persistent {
+  color: #6f6f6f;
+}
+
+#workspaces button.urgent {
+  background: @danger;
+  border-bottom-color: @danger;
+  color: #000000;
+}
+
+#mode {
+  background: @amber;
+  border-color: @amber;
+  color: #080808;
+  font-weight: 700;
+}
+
+#clock {
+  background: @text;
+  border-color: @text;
+  color: #050505;
+  font-weight: 700;
+  padding: 0 11px;
+}
+
+#mpris {
+  color: @amber;
+  min-width: 0;
+}
+
+#mpris.playing {
+  border-color: rgba(102, 217, 200, 0.35);
+  color: @accent;
+}
+
+#mpris.paused {
+  color: @muted;
+}
+
+#idle_inhibitor.activated {
+  background: rgba(102, 217, 200, 0.18);
+  border-color: @border_active;
+  color: @accent;
+}
+
+#pulseaudio.muted,
+#network.disconnected,
+#network.disabled,
+#bluetooth.off {
+  background: rgba(255, 107, 107, 0.12);
+  border-color: rgba(255, 107, 107, 0.30);
+  color: @danger;
+}
+
+#network.wifi,
+#network.ethernet,
+#bluetooth.connected {
+  color: @accent;
+}
+
+#backlight {
+  color: @amber;
+}
+
+#custom-cpu.warning,
+#memory.warning,
+#battery.warning:not(.charging) {
+  border-color: rgba(229, 184, 92, 0.40);
+  color: @warning;
+}
+
+#custom-cpu.critical,
+#memory.critical,
+#battery.critical:not(.charging) {
+  background: rgba(255, 107, 107, 0.14);
+  border-color: rgba(255, 107, 107, 0.42);
+  color: @danger;
+}
+
+#battery.charging,
+#battery.plugged {
+  border-color: rgba(139, 209, 124, 0.36);
+  color: @green;
+}
+
+#tray {
+  padding: 0 7px;
+}
