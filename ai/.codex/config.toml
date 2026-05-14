@@ -1,9 +1,16 @@
 model = "gpt-5.5"
 model_reasoning_effort = "xhigh"
+plan_mode_reasoning_effort = "xhigh"
 [projects."/home/boris"]
 trust_level = "trusted"
 
 [projects."/home/boris/projects/OmniLab"]
+trust_level = "trusted"
+
+[projects."/home/boris/html_css"]
+trust_level = "trusted"
+
+[projects."/home/boris/dotfiles"]
 trust_level = "trusted"
 
 [tui.model_availability_nux]
