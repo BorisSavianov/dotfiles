@@ -20,6 +20,9 @@ set $menu rofi -config /home/boris/.config/rofi/config.rasi -show drun -show-ico
 # Your preferred file manager
 set $files nautilus
 
+### Authentication
+exec_always /home/boris/.local/bin/polkit-agent-start
+
 ### Dark theme defaults
 set $gtk_theme Adwaita:dark
 set $gtk_settings_theme Adwaita-dark

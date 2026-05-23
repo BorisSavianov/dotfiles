@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+
+if ! command -v lxqt-policykit-agent >/dev/null 2>&1; then
+    exit 0
+fi
+
+if pgrep -u "$(id -u)" -f '(^|/)lxqt-policykit-agent($| )' >/dev/null 2>&1; then
+    exit 0
+fi
+
+exec lxqt-policykit-agent
