@@ -1,21 +1,28 @@
 #!/bin/sh
-set -eu
+set -u
 
 if ! command -v lxqt-policykit-agent >/dev/null 2>&1; then
     exit 0
 fi
 
-if pgrep -u "$(id -u)" -f '(^|/)lxqt-policykit-agent($| )' >/dev/null 2>&1; then
+if [ -z "${WAYLAND_DISPLAY:-}" ] && [ -z "${DISPLAY:-}" ]; then
     exit 0
 fi
 
+lock="${XDG_RUNTIME_DIR:-/tmp}/polkit-agent-start.lock"
+exec 9>"$lock"
+/usr/bin/flock -n 9 || exit 0
+
 export GTK_THEME="${GTK_THEME:-Adwaita:dark}"
-export QT_QPA_PLATFORMTHEME="${QT_QPA_PLATFORMTHEME:-gtk3}"
 export QT_STYLE_OVERRIDE="${QT_STYLE_OVERRIDE:-Fusion}"
 
 stylesheet="${XDG_CONFIG_HOME:-$HOME/.config}/lxqt/polkit-agent.qss"
-if [ -r "$stylesheet" ]; then
-    exec lxqt-policykit-agent -stylesheet "$stylesheet"
-fi
 
-exec lxqt-policykit-agent
+while :; do
+    if [ -r "$stylesheet" ]; then
+        lxqt-policykit-agent -stylesheet "$stylesheet"
+    else
+        lxqt-policykit-agent
+    fi
+    sleep 1
+done
