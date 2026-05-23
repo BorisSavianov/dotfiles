@@ -9,4 +9,13 @@ if pgrep -u "$(id -u)" -f '(^|/)lxqt-policykit-agent($| )' >/dev/null 2>&1; then
     exit 0
 fi
 
+export GTK_THEME="${GTK_THEME:-Adwaita:dark}"
+export QT_QPA_PLATFORMTHEME="${QT_QPA_PLATFORMTHEME:-gtk3}"
+export QT_STYLE_OVERRIDE="${QT_STYLE_OVERRIDE:-Fusion}"
+
+stylesheet="${XDG_CONFIG_HOME:-$HOME/.config}/lxqt/polkit-agent.qss"
+if [ -r "$stylesheet" ]; then
+    exec lxqt-policykit-agent -stylesheet "$stylesheet"
+fi
+
 exec lxqt-policykit-agent
